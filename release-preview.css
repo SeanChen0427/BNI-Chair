@@ -1,0 +1,3 @@
+.release-preview-note{margin:12px 0;padding:10px 12px;border:1px solid #e8d2ac;border-radius:8px;background:#fff8eb;color:#755222;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.release-preview-bar{margin:12px 24px 0;flex-shrink:0}
+@media(max-width:640px){.release-preview-bar{margin:10px 12px 0;font-size:12px}}

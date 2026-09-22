@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#a5151b">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <title>登入｜富聯核心團隊</title>
+  <link rel="icon" href="assets/images/fulian-favicon.png">
+  <link rel="stylesheet" href="login.css?v=b92ced8f8048">
+  <link rel="stylesheet" href="release-preview.css?v=39c7cad80e09">
+  <script src="preview-session.js?v=ef87f0d420c2" defer></script><script src="login.js?v=df90c8563fe7" defer></script>
+</head>
+<body>
+  <main class="login-shell">
+    <section class="brand-panel" aria-label="富聯分會">
+      <div class="brand-top"><img src="assets/images/fulian-favicon.png" alt="富聯分會標誌"><span class="brand-name"><b>富聯核心團隊</b><small>FULIAN CHAPTER</small></span></div>
+      <div class="brand-story">
+        <span class="eyebrow">CHAPTER LEADERSHIP</span>
+        <h1>讓每一份承諾<br>成為共同的成果</h1>
+        <p class="brand-description">回到基本功，以股東的心態共同經營分會；讓每位會員的承諾都有執行與追蹤，將夥伴情誼化為實際的商務合作。</p>
+        <div class="brand-tags" aria-label="本屆三大主軸"><span>全員當責</span><span>股東思維</span><span>產業鏈實踐</span></div>
+      </div>
+      <div class="brand-foot"><span>核心團隊 × 產業領頭羊</span><b>讓每一次決議，都有值得信任的依據</b></div>
+    </section>
+    <div class="access-panel">
+      <section class="login-card" aria-labelledby="panelTitle">
+        <span class="preview-label">介面試用版</span>
+        <p class="release-preview-note">資料只保存在目前瀏覽器，尚未啟用正式帳號與多人同步。原本本機試填的內容不會自動帶入此網址。</p>
+        <h2 id="panelTitle" tabindex="-1">登入工作台</h2>
+        <p class="intro" id="panelIntro">使用目前職務的共用帳號。</p>
+        <form id="loginForm">
+          <label>帳號<input id="username" autocomplete="off" readonly placeholder="請輸入帳號" aria-describedby="previewNote"></label>
+          <label>密碼<input id="password" type="password" autocomplete="off" disabled placeholder="請輸入密碼"></label>
+          <button class="primary" id="loginButton" disabled>登入系統</button>
+        </form>
+        <form id="identityForm" hidden>
+          <label><span id="identityLabel">選擇職務</span><select id="identity" required></select></label>
+          <p class="empty-note" id="rosterNote" hidden>領頭羊名單尚未設定。</p>
+          <button class="primary" id="identityButton">進入工作台</button>
+          <button class="secondary" type="button" data-back>返回登入</button>
+        </form>
+        <section id="complete" hidden aria-label="登入流程完成">
+          <div class="selected-identity"><span>目前身分</span><strong id="selectedIdentity"></strong></div>
+          <p class="intro">登入流程試看完成。</p>
+          <button class="secondary" type="button" data-back>返回登入</button>
+        </section>
+        <div id="previewControls" class="preview-controls">
+          <p id="previewNote">正式帳密尚未啟用，請選擇下方身分試看。</p>
+          <details id="previewPicker" open>
+            <summary>試看四層登入</summary>
+            <div class="preview-roles" role="group" aria-label="試看帳號類別">
+              <button type="button" data-role="maintenance" aria-pressed="false">系統維護</button>
+              <button type="button" data-role="chair" aria-pressed="false">主席</button>
+              <button type="button" data-role="core" aria-pressed="false">核心</button>
+              <button type="button" data-role="leader" aria-pressed="false">領頭羊</button>
+            </div>
+          </details>
+        </div>
+        <noscript><p>請開啟 JavaScript 以試看登入流程。</p></noscript>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
