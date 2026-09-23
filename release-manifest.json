@@ -1,9 +1,9 @@
 {
-  "release": "v0.6-member-readonly-20260923",
+  "release": "v0.6-member-donut-20260923",
   "mode": "authenticated-members-browser-local-work",
   "assets": {
-    "index.html": "12b0f5c132fee3bc7916dbc54f4a9e4800d2f205eb8107caab66996fb7570e11",
-    "dashboard.html": "870e205a9141367b6a8363221943613b5c6520f9604bb28cbdfa7f31bffa4b22",
+    "index.html": "18a42eb913dc058ef6930fa91668fd5ae30775207a399b1630cad4a5d37166b1",
+    "dashboard.html": "b0b1ba1da3f801d9e173e4b7f32bad4ce77f599a5cdbe15bf7da929f58585a12",
     "login.css": "b92ced8f804894a91368a36d93ff8fb6613b7da8514802997250d19bfe6d8abc",
     "preview-session.js": "c86554d1925e6644d3d72dcb5055e1f67dde54f89ee74fd39be7422a3ee1720d",
     "release-preview.css": "39c7cad80e099801922647669c0511b5a94e2c9c5087ff90646e2d17e3422cb7",
@@ -33,7 +33,7 @@
     "assets/images/chair-login-global-v1.png": "da08d1523a323a35284bd9657f4e3923f6307540c4dde6cf9deb63825628703b",
     "chair-auth.js": "abb801f273bf5c95700c8d26047774257e95f8cd7e7bb07459eca5eeb4f602df",
     "production-login.js": "5a94853dff095263858885c634b236e350d73cbe27ca3eecd35ff2fe8e45f07c",
-    "member-data.js": "5502738f359d028a68941e145fa9572c5fc2d6c6380925f4c102eb07d1d11eb0",
-    "member-data.css": "0825ac26d2aa770d726f8579e48bba02b44b9b26f4e586abc59013bd8248e833"
+    "member-data.js": "432ea3ed748d6fec6ae1702b17ef18a36d78b09c6ebbe10f031710baf18fce51",
+    "member-data.css": "7266a0e99a34f3195e39783365778f7a7ff8f3c99a40f135b37eec5e16e554e9"
   }
 }
