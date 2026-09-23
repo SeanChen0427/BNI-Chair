@@ -9,11 +9,20 @@
   const consensusTopics=[
     {title:'本屆重要活動時間設定',guide:'BOD、Power Day、週年慶等。'},
     {title:'本屆分會 KPI 目標',guide:'年度分會目標、每月來賓、首年留員率、每月1對1、總體留員率、培訓率、每月引薦單數、綠燈會員比例、每月引薦金額。'},
+    {title:'Power of One 設定',guide:''},
     {title:'各執掌的看見與職務目標',guide:'主席、副主席、秘書財務、教育協調員、導師協調員、活動協調員、接待組長、成長協調員。各執掌分別填寫看見與職務目標。'},
-    {title:'會前會會議時間設定',guide:''},
     {title:'交接會議議程',guide:''},
-    {title:'Power of One 設定',guide:'先記錄共識；要在首頁顯示時，再到「Power of One」填寫設定。'}
+    {title:'會前會會議時間設定',guide:''}
   ];
+  // Reorder only the six recognised topics; retain custom slots, IDs and content.
+  function orderedSections(m){
+    const sections=m.agenda?.sections||[];
+    if(m.type!==consensusType)return [...sections];
+    const kinds=['activities','termKpi','power','roleGoals','handover','preSchedule'];
+    const rank=s=>s.kind?kinds.indexOf(s.kind):consensusTopics.findIndex(t=>t.title===s.title);
+    const known=sections.filter(s=>rank(s)>=0).sort((a,b)=>rank(a)-rank(b));
+    let n=0;return sections.map(s=>rank(s)>=0?known[n++]:s);
+  }
   const roleTopic='各執掌的看見與職務目標';
   const roleItems=()=>units.map(u=>({...item(),roleId:u.id}));
   const template=type=>({version:1,sections:type===consensusType?consensusTopics.map(t=>({...section('chair',t.title),...(t.title==='本屆分會 KPI 目標'?{kind:'termKpi'}:t.title===roleTopic?{kind:'roleGoals',items:roleItems()}:{})})):units.flatMap(u=>(type==='會前會'?headings[u.id]:type==='會後會'?(u.id==='finance'?['來賓狀況與跟進','例會回饋','後續安排']:['例會回饋','改善事項','後續安排']):['討論事項']).map(t=>section(u.id,t)))});
@@ -34,6 +43,7 @@
   // on existing tasks remain live; meeting text and snapshots retain their context.
   function apply(data,draft,by,edits=new Set()){
     const m=structuredClone(draft), old=data.meetings.find(x=>x.id===m.id), now=new Date().toISOString();
+    m.agenda.sections=orderedSections(m);
     if(!m.title.trim())throw Error('請填寫會議名稱。');if(!dateOK(m.date))throw Error('請選擇有效的會議日期。');
     const oldItems=old?.agenda?.sections.flatMap(s=>s.items)||[], newIds=new Set(m.agenda.sections.flatMap(s=>s.items.map(i=>i.id)));
     for(const i of oldItems)if(i.taskId&&!newIds.has(i.id))throw Error('已有工作的紀錄請保留，避免失去會議來源。');
@@ -60,5 +70,5 @@
     if(old)data.meetings[data.meetings.indexOf(old)]=m;else data.meetings.push(m);
     validate(data);return m;
   }
-  window.ChairMeetingModel=Object.freeze({units,item,section,template,apply,validate,dateOK,consensusType,consensusTopics,types,roleTopic,roleItems});
+  window.ChairMeetingModel=Object.freeze({units,item,section,template,apply,validate,dateOK,consensusType,consensusTopics,types,roleTopic,roleItems,orderedSections});
 })();
