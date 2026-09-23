@@ -9,28 +9,29 @@
   const consensusTopics=[
     {title:'本屆重要活動時間設定',guide:'BOD、Power Day、週年慶等。'},
     {title:'本屆分會 KPI 目標',guide:'年度分會目標、每月來賓、首年留員率、每月1對1、總體留員率、培訓率、每月引薦單數、綠燈會員比例、每月引薦金額。'},
+    {title:'三大重點與年度執行規劃',guide:''},
     {title:'Power of One 設定',guide:''},
     {title:'各執掌的看見與職務目標',guide:'主席、副主席、秘書財務、教育協調員、導師協調員、活動協調員、接待組長、成長協調員。各執掌分別填寫看見與職務目標。'},
     {title:'交接會議議程',guide:''},
     {title:'會前會會議時間設定',guide:''}
   ];
-  // Reorder only the six recognised topics; retain custom slots, IDs and content.
+  // Reorder only the recognised topics; retain custom slots, IDs and content.
   function orderedSections(m){
     const sections=m.agenda?.sections||[];
     if(m.type!==consensusType)return [...sections];
-    const kinds=['activities','termKpi','power','roleGoals','handover','preSchedule'];
+    const kinds=['activities','termKpi','strategy','power','roleGoals','handover','preSchedule'];
     const rank=s=>s.kind?kinds.indexOf(s.kind):consensusTopics.findIndex(t=>t.title===s.title);
     const known=sections.filter(s=>rank(s)>=0).sort((a,b)=>rank(a)-rank(b));
     let n=0;return sections.map(s=>rank(s)>=0?known[n++]:s);
   }
   const roleTopic='各執掌的看見與職務目標';
   const roleItems=()=>units.map(u=>({...item(),roleId:u.id}));
-  const template=type=>({version:1,sections:type===consensusType?consensusTopics.map(t=>({...section('chair',t.title),...(t.title==='本屆分會 KPI 目標'?{kind:'termKpi'}:t.title===roleTopic?{kind:'roleGoals',items:roleItems()}:{})})):units.flatMap(u=>(type==='會前會'?headings[u.id]:type==='會後會'?(u.id==='finance'?['來賓狀況與跟進','例會回饋','後續安排']:['例會回饋','改善事項','後續安排']):['討論事項']).map(t=>section(u.id,t)))});
+  const template=type=>({version:1,...(type===consensusType?{consensusVersion:2}:{}),sections:type===consensusType?consensusTopics.map(t=>({...section('chair',t.title),...(t.title==='本屆分會 KPI 目標'?{kind:'termKpi'}:t.title===roleTopic?{kind:'roleGoals',items:roleItems()}:t.title==='三大重點與年度執行規劃'?{kind:'strategy'}:{})})):units.flatMap(u=>(type==='會前會'?headings[u.id]:type==='會後會'?(u.id==='finance'?['來賓狀況與跟進','例會回饋','後續安排']:['例會回饋','改善事項','後續安排']):['討論事項']).map(t=>section(u.id,t)))});
   const dateOK=s=>typeof s==='string'&&(!s||/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s))&&new Date(s+'T12:00:00Z').toISOString().slice(0,10)===s);
   function validate(data){
     const safeId=v=>typeof v==='string'&&/^[A-Za-z0-9_-]{1,100}$/.test(v);
     const fail=()=>{throw Error('會議紀錄格式不符，已保留原資料。');}, refs=new Set();
-    for(const m of data.meetings){for(const v of [m,...(m.history||[])])if(v.termKpi!==undefined){if(!window.ChairTermKpi||v.termKpi?.termId!==window.ChairTermKpi.term.id)fail();window.ChairTermKpi.validateValues(v.termKpi.values);}if(m.agenda===undefined)continue;const a=m.agenda;if(a?.version!==1||!Array.isArray(a.sections))fail();const seen=new Set();
+    for(const m of data.meetings){for(const v of [m,...(m.history||[])])for(const s of v.agenda?.sections||[])if(s.strategy!==undefined){if(!window.ChairStrategy)throw Error('年度規劃模組尚未載入，已停止寫入。');window.ChairStrategy.validate(s.strategy);}for(const v of [m,...(m.history||[])])if(v.termKpi!==undefined){if(!window.ChairTermKpi||v.termKpi?.termId!==window.ChairTermKpi.term.id)fail();window.ChairTermKpi.validateValues(v.termKpi.values);}if(m.agenda===undefined)continue;const a=m.agenda;if(a?.version!==1||a.consensusVersion!==undefined&&a.consensusVersion!==2||!Array.isArray(a.sections))fail();const seen=new Set();
       for(const s of a.sections){if(!s||!safeId(s.id)||seen.has(s.id)||!units.some(u=>u.id===s.unitId)||typeof s.title!=='string'||!s.title.trim()||s.title.length>160||!Array.isArray(s.items))fail();seen.add(s.id);
         for(const i of s.items){if(!i||i.roleId!==undefined&&!units.some(u=>u.id===i.roleId)||!safeId(i.id)||seen.has(i.id)||typeof i.text!=='string'||i.text.length>8000||!Array.isArray(i.tags)||i.tags.some(t=>typeof t!=='string'||!t.trim()||t.length>60)||!dateOK(i.date)||!['execution','deadline','regular'].includes(i.dateKind)||typeof i.node!=='string'||i.node.length>160||typeof i.time!=='string'||i.time&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(i.time)||!Array.isArray(i.units)||new Set(i.units).size!==i.units.length||i.units.some(x=>!units.some(u=>u.id===x))||typeof i.work!=='boolean')fail();seen.add(i.id);
           if(i.taskId){const t=data.tasks.find(t=>t.id===i.taskId);if(!t||refs.has(t.id)||t.sourceId!==m.id||t.sourceEntryId!==i.id||!i.work)fail();refs.add(t.id);}
@@ -66,7 +67,8 @@
     }
     m.title=m.title.trim();m.createdAt=old?.createdAt||now;m.updatedAt=now;
     if(m.powerOfOne!==undefined){window.ChairPowerOfOne.validate(m.powerOfOne);m.powerOfOne.title=m.powerOfOne.title.trim();m.powerOfOne.action=m.powerOfOne.action.trim();}
-    m.history=[...(old?.history||[]),{at:now,by,title:m.title,status:m.status,date:m.date,...(m.startTime!==undefined?{startTime:m.startTime,endTime:m.endTime||''}:{}),notes:m.notes,agenda:structuredClone(m.agenda),...(m.powerOfOne!==undefined?{powerOfOne:structuredClone(m.powerOfOne)}:{}),...(m.termKpi!==undefined?{termKpi:structuredClone(m.termKpi)}:{})}];
+    if(m.powerOfOneMonths!==undefined){window.ChairPowerOfOne.validateMonths(m.powerOfOneMonths);for(const p of m.powerOfOneMonths){p.title=p.title.trim();p.action=p.action.trim();}}
+    m.history=[...(old?.history||[]),{at:now,by,title:m.title,status:m.status,date:m.date,...(m.startTime!==undefined?{startTime:m.startTime,endTime:m.endTime||''}:{}),notes:m.notes,agenda:structuredClone(m.agenda),...(m.powerOfOne!==undefined?{powerOfOne:structuredClone(m.powerOfOne)}:{}),...(m.powerOfOneMonths!==undefined?{powerOfOneMonths:structuredClone(m.powerOfOneMonths)}:{}),...(m.termKpi!==undefined?{termKpi:structuredClone(m.termKpi)}:{})}];
     if(old)data.meetings[data.meetings.indexOf(old)]=m;else data.meetings.push(m);
     validate(data);return m;
   }

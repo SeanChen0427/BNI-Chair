@@ -22,7 +22,7 @@
   };
   const validateConsensus=data=>{if(window.ChairConsensus)window.ChairConsensus.validate(data);else if(data.preMeetingSchedule!==undefined||data.meetings.some(m=>m.agenda?.sections.some(s=>s.events!==undefined||s.schedule!==undefined)))throw Error('共識設定模組尚未載入，已停止寫入。');};
   const validateKpi=data=>{if(data.termGoals!==undefined){if(!window.ChairTermKpi)throw Error("KPI 模組尚未載入，已停止寫入。");window.ChairTermKpi.validateAll(data);}};
-  const validatePower=data=>{for(const m of data.meetings){if(m.powerOfOne!==undefined){if(!window.ChairPowerOfOne)throw Error("Power of One 模組尚未載入，已停止寫入。");window.ChairPowerOfOne.validate(m.powerOfOne);}}};
+  const validatePower=data=>{for(const m of data.meetings){if(m.powerOfOne!==undefined||m.powerOfOneMonths!==undefined){if(!window.ChairPowerOfOne)throw Error("Power of One 模組尚未載入，已停止寫入。");window.ChairPowerOfOne.validateMeeting(m);}}};
   const validateMeetings=data=>{if(data.meetings.some(m=>m.agenda!==undefined||m.termKpi!==undefined||m.history?.some(h=>h.termKpi!==undefined))||data.tasks.some(t=>t.sourceEntryId)){if(!window.ChairMeetingModel)throw Error("會議模組尚未載入，已停止寫入。");window.ChairMeetingModel.validate(data);}};
   const parse=raw=>{if(raw===null)return empty();
     let data;try{data=JSON.parse(raw);}catch{throw Error("本機資料無法讀取，已停止寫入並保留原內容。");}

@@ -1,7 +1,7 @@
 "use strict";
 (() => {
   const M=ChairMeetingModel;
-  const kinds={'本屆重要活動時間設定':'activities','本屆分會 KPI 目標':'termKpi','各執掌的看見與職務目標':'roleGoals','會前會會議時間設定':'preSchedule','交接會議議程':'handover','Power of One 設定':'power'};
+  const kinds={'三大重點與年度執行規劃':'strategy','本屆重要活動時間設定':'activities','本屆分會 KPI 目標':'termKpi','各執掌的看見與職務目標':'roleGoals','會前會會議時間設定':'preSchedule','交接會議議程':'handover','Power of One 設定':'power'};
   const kind=s=>s.kind||kinds[s.title]||'';
   const event=(title='')=>({id:crypto.randomUUID(),title,date:'',startTime:'',endTime:''});
   const schedule=()=>({weekday:'',startTime:'',endTime:'',note:''});
@@ -15,7 +15,7 @@
       if(s.schedule!==undefined)validateSchedule(s.schedule);
     }}
   }
-  function prepare(m,data){let changed=false;if(m.type!==M.consensusType)return changed;for(const s of m.agenda.sections){const k=kind(s);if(k&&!s.kind){s.kind=k;changed=true;}if(k==='activities'&&!s.events){s.events=['BOD','Power Day','週年慶'].map(event);changed=true;}if(k==='preSchedule'&&!s.schedule){const {weekday,startTime,endTime,note}=data.preMeetingSchedule||schedule();s.schedule={weekday,startTime,endTime,note};changed=true;}}return changed;}
+  function prepare(m,data){let changed=false;if(m.type!==M.consensusType)return changed;if(m.agenda.consensusVersion!==2){if(!m.agenda.sections.some(s=>kind(s)==='strategy')){const s={...M.section('chair','三大重點與年度執行規劃'),kind:'strategy'},at=m.agenda.sections.findIndex(s=>kind(s)==='power');m.agenda.sections.splice(at<0?m.agenda.sections.length:at,0,s);}m.agenda.consensusVersion=2;changed=true;}for(const s of m.agenda.sections){const k=kind(s);if(k&&!s.kind){s.kind=k;changed=true;}if(k==='strategy'&&!s.strategy){s.strategy=window.ChairStrategy.empty();changed=true;}if(k==='activities'&&!s.events){s.events=['BOD','Power Day','週年慶'].map(event);changed=true;}if(k==='preSchedule'&&!s.schedule){const {weekday,startTime,endTime,note}=data.preMeetingSchedule||schedule();s.schedule={weekday,startTime,endTime,note};changed=true;}}return changed;}
   function applySchedule(data,m,by,edits){const s=m.agenda.sections.find(s=>kind(s)==='preSchedule');if(!s)return;const next={...(data.preMeetingSchedule||schedule())};for(const key of edits)next[key]=s.schedule[key];validateSchedule(next);data.preMeetingSchedule={...next,sourceId:m.id,updatedBy:by,updatedAt:new Date().toISOString()};}
   function calendar(data){return data.meetings.flatMap(m=>(m.agenda?.sections||[]).flatMap(s=>(s.events||[]).filter(e=>e.date&&e.title.trim()).map(e=>({...e,kind:'activity',id:m.id+'-'+e.id,sourceId:m.id,sectionId:s.id,status:'已排定',owner:'',title:e.title.trim()}))));}
   const scheduleText=v=>v?[v.weekday!==''?'每週'+['日','一','二','三','四','五','六'][Number(v.weekday)]:'時間彈性安排',[v.startTime,v.endTime].filter(Boolean).join('–'),v.note].filter(Boolean).join(' · '):'';
