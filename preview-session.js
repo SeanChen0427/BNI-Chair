@@ -1,6 +1,10 @@
 "use strict";
-// This is a local UI identity only, never an authentication or permission boundary.
+// Compatibility adapter. Formal permissions are enforced by chair-api; the fallback is local QA only.
 (() => {
+  if(window.ChairAuth?.enabled){
+    window.PreviewIdentity=Object.freeze({roles:Object.freeze({chair:"主席",core:"核心"}),core:["副主席","秘書財務","教育協調員","導師協調員","活動協調員","接待組長","成長協調員"],get:()=>ChairAuth.identity(),logout:()=>ChairAuth.logout()});
+    return;
+  }
   const KEY = "fulian-chair-rebuild-preview-identity-v1";
   const roles = Object.freeze({maintenance:"系統維護",chair:"主席",core:"核心",leader:"領頭羊"});
   const core = Object.freeze(["副主席","秘書財務","教育協調員","導師協調員","活動協調員","接待組長","成長協調員"]);

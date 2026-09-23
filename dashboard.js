@@ -1,7 +1,9 @@
 "use strict";
-(() => {
+(async () => {
+  if(window.ChairAuth?.enabled){try{await ChairAuth.restore();}catch(e){const alert=document.getElementById('storageAlert');alert.hidden=false;alert.textContent=e.message+' ';const retry=document.createElement('a');retry.href='index.html';retry.textContent='返回登入';alert.append(retry);return;}}
   const I=PreviewIdentity, S=ChairData, C=ChairCalendar, identity=I.get();
   if(!identity){location.replace("index.html");return;}
+  if(window.ChairAuth?.enabled)ChairMembers.load();
   const $=id=>document.getElementById(id), E=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const roles=["主席",...I.core], taskStates=ChairBoardModel.states, meetingStates=["準備中","待追蹤","已結束"];
   const today=C.iso(new Date()), titleMap={home:"主頁儀表板",tasks:"工作案件",meetings:"會議案件",meeting:"會議紀錄",calendar:"工作月曆",members:"會員狀態",resources:"常用資源",updates:"系統更新",settings:"系統設定",units:"各執掌工作區"};
@@ -60,10 +62,11 @@
     const pending=data.tasks.filter(t=>t.status!=="已完成").length, meetings=data.meetings.filter(m=>m.status==="準備中").length;
     $("taskCount").textContent=pending;$("meetingCount").textContent=meetings;$("helpCount").textContent=data.tasks.filter(t=>t.status==="需協助").length;
     $("navTasks").textContent=pending;$("navMeetings").textContent=data.meetings.filter(m=>m.status!=="已結束").length;
-    $("overviewPeriod").textContent=`${today.slice(0,4)} 年 ${Number(today.slice(5,7))} 月 · 本機試看`;
+    $("overviewPeriod").textContent=`${today.slice(0,4)} 年 ${Number(today.slice(5,7))} 月 · 工作保存在此瀏覽器`;
     termKpi.render();renderPower();renderMessages();renderLists();renderCalendar();renderNotices();renderResources();boards.render();homeLayout.refresh();
   }
   const homeLayout=ChairHomeLayout.create({identity,toast});
+  window.addEventListener('chair-members-render',()=>homeLayout.refresh());
   const termKpi=ChairTermKpiUI.create({getData:()=>data,commit,identity,escape:E,toast});
   const deletion=ChairDeletion.create({getData:()=>data,commit});
   const boards=ChairBoards.create({getData:()=>data,commit,deletion,openTask:prefill=>openEditor("task","",prefill),identity,escape:E,toast});
@@ -185,7 +188,7 @@
   document.addEventListener("click",e=>{if(!e.target.closest(".top-actions")){$("notificationPanel").hidden=true;$("bell").setAttribute("aria-expanded","false");}});
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeMenu();$("notificationPanel").hidden=true;$("bell").setAttribute("aria-expanded","false");}});
   $("readAll").onclick=()=>{try{const keys=notices().map(n=>n.key);commit(d=>d.read=[...new Set([...d.read,...keys])]);}catch(e){toast(e.message);}};
-  const help={units:["選擇工作單位，再建立一張張有封面的看板。","看板內可原位新增卡片、自訂清單；拖曳卡片改變順序或移到其他清單。清單標示的狀態會套用到移入的工作。","點卡片可編輯原工作案件、職務與期限，月曆共用同一筆資料。卡片移動選單可供手機及鍵盤操作。","成員是本機協作名單，新增姓名不會發出邀請或開通權限。"],home:["按住區塊標題或 ⠿ 即可拖移，手機長按啟動，放開保存；系統設定可恢復預設排列。鍵盤可按空白鍵選取、上下键移動、Enter 保存、Escape 取消。","首頁本屆 KPI 可直接設定九項目標；留空顯示 —，修改後可查保存版本，目前尚未接入實績。","在會議內設定 Power of One，勾選在首頁顯示並儲存。首頁依期間呈現本期、即將開始及過往設定。","留言板可留下公告、提醒或交接內容，僅保存在目前瀏覽器。","會員狀態呈現分會整體燈號；尚未連接資料，因此不顯示示意數字。","工作期限與會議日期會出現在月曆。點案件可繼續更新。"],tasks:["按新增工作，填名稱後可保存；負責職務與期限可以稍後補。","用待處理、我的工作、需協助或已完成切換清單。","修改案件後按儲存，月曆與首頁同步更新，修改紀錄保留。"],meetings:["新增會議先選種類，再進入議程；要更換時點「更換種類」。","選會前會或會後會，切換執掌後在各議程獨立填寫；議程可增減、改名。","每筆紀錄旁可加標籤、執行日期／例會場次及協作單位；選單位即列入工作，儲存後同步各執掌工作區。","工作追蹤可更新同一筆工作的狀態；會議結束與工作完成分開。本機保存，尚無正式多人同步。"],calendar:["點日期看當日工作期限、會議、培訓及例會安排；點培訓可看詳細資訊。","從日期下方新增工作或會議，日期會先帶入；保存後才生效。","週二例會與國定假日／補假休會沿既有任期設定，例會時間未定。"],members:["此區讓核心幹部掌握分會整體紅綠燈人數與比例。","尚未連接會員資料，數字及更新日期以 — 顯示；空白不代表會員為零。"],resources:["保存常用文件或網站的連結。","只接受 http／https 網址，外部網站會在新分頁開啟。"],updates:["這裡列出新版各階段已完成及尚未接上的內容。"],settings:["匯出備份會下載此新版的本機內容，包含留言、工作、會議與資源。","登出只清除本分頁的試看身分，已保存內容保留。"]};
+  const help={units:["選擇工作單位，再建立一張張有封面的看板。","看板內可原位新增卡片、自訂清單；拖曳卡片改變順序或移到其他清單。清單標示的狀態會套用到移入的工作。","點卡片可編輯原工作案件、職務與期限，月曆共用同一筆資料。卡片移動選單可供手機及鍵盤操作。","成員是本機協作名單，新增姓名不會發出邀請或開通權限。"],home:["按住區塊標題或 ⠿ 即可拖移，手機長按啟動，放開保存；系統設定可恢復預設排列。鍵盤可按空白鍵選取、上下键移動、Enter 保存、Escape 取消。","首頁本屆 KPI 可直接設定九項目標；留空顯示 —，修改後可查保存版本，目前尚未接入實績。","在會議內設定 Power of One，勾選在首頁顯示並儲存。首頁依期間呈現本期、即將開始及過往設定。","留言板可留下公告、提醒或交接內容，僅保存在目前瀏覽器。","會員狀態讀取委員會已發布分析；會員名單可展開查閱，並顯示來源期間。","工作期限與會議日期會出現在月曆。點案件可繼續更新。"],tasks:["按新增工作，填名稱後可保存；負責職務與期限可以稍後補。","用待處理、我的工作、需協助或已完成切換清單。","修改案件後按儲存，月曆與首頁同步更新，修改紀錄保留。"],meetings:["新增會議先選種類，再進入議程；要更換時點「更換種類」。","選會前會或會後會，切換執掌後在各議程獨立填寫；議程可增減、改名。","每筆紀錄旁可加標籤、執行日期／例會場次及協作單位；選單位即列入工作，儲存後同步各執掌工作區。","工作追蹤可更新同一筆工作的狀態；會議結束與工作完成分開。本機保存，尚無正式多人同步。"],calendar:["點日期看當日工作期限、會議、培訓及例會安排；點培訓可看詳細資訊。","從日期下方新增工作或會議，日期會先帶入；保存後才生效。","週二例會與國定假日／補假休會沿既有任期設定，例會時間未定。"],members:["此區讓核心幹部掌握分會整體紅綠燈人數與比例。","顯示目前在籍會員及最近已結束月份的已發布分析；缺少對應資料顯示 —，不當作零。"],resources:["保存常用文件或網站的連結。","只接受 http／https 網址，外部網站會在新分頁開啟。"],updates:["這裡列出新版各階段已完成及尚未接上的內容。"],settings:["匯出備份會下載此新版的本機內容，包含留言、工作、會議與資源。","登出會清除此分頁的登入；已保存在瀏覽器的工作內容仍保留。"]};
   $("help").onclick=()=>{$("helpTitle").textContent=titleMap[route]+"操作教學";$("helpContent").innerHTML=`<ul>${help[route==="meeting"?"meetings":route].map(t=>`<li>${E(t)}</li>`).join("")}</ul>`;$("helpDialog").showModal();};$("closeHelp").onclick=()=>$("helpDialog").close();$("version").onclick=()=>navigate("#updates");
   $("exportData").onclick=()=>{try{const blob=new Blob([S.raw()],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`富聯核心團隊-本機備份-${today}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){toast(e.message);}};
   $("logout").onclick=()=>{if(($("messageInput").value.trim()||editorState?.dirty||boards.dirty()||cardDetails.dirty()||meetingWorkspace.dirty()||termKpi.dirty())&&!confirm("仍有未儲存內容，確定登出嗎？"))return;I.logout();};
