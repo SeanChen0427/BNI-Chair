@@ -3,7 +3,7 @@
   "mode": "authenticated-shared-chair-work",
   "assets": {
     "index.html": "45994485dc4de79dfab8fab960eca57f3c29130e8886d8443212a4cfff890950",
-    "dashboard.html": "11d7e569d262f28b8967a1c8bd81b99ca020cdea4b355a4062de5ac93e32cba2",
+    "dashboard.html": "d04c2bfdba38572f1070a8c7e90a6c6d6b340e2d1dc4cdd83d6ac978b7a78d1e",
     "login.css": "b92ced8f804894a91368a36d93ff8fb6613b7da8514802997250d19bfe6d8abc",
     "preview-session.js": "c86554d1925e6644d3d72dcb5055e1f67dde54f89ee74fd39be7422a3ee1720d",
     "release-preview.css": "39c7cad80e099801922647669c0511b5a94e2c9c5087ff90646e2d17e3422cb7",
@@ -37,7 +37,7 @@
     "member-data.js": "432ea3ed748d6fec6ae1702b17ef18a36d78b09c6ebbe10f031710baf18fce51",
     "member-data.css": "7266a0e99a34f3195e39783365778f7a7ff8f3c99a40f135b37eec5e16e554e9",
     "cloud-store.js": "029cb6b54967250914b19627060d275220e2a0ff9dd145982916a4e2c3a0875d",
-    "strategy-plan.js": "4229855a2f9b7b1ae3f408cb65f5bc51aa24357a2930622163b0f99b079eabec",
-    "strategy-plan.css": "3b4b871c9ad4d59cbe6dcde73addec722defec3f1e34d29fd724e45d4c145ff7"
+    "strategy-plan.js": "14e97326aba777a32aa7e9281a470e591669fadd596e9811ab8f991b5968c3d1",
+    "strategy-plan.css": "f43864f9e4575af176eb9c8131d0a23c708d401228b6cc52235dd3979d431f74"
   }
 }
