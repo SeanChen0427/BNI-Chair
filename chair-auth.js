@@ -25,6 +25,13 @@
       }).catch(e=>{if(stamp===epoch&&[400,401,403].includes(e.status))clear();throw e;}).finally(()=>{refreshing=null;});
     }return refreshing;
   }
+  async function rpc(body){
+    const access=await token();
+    const response=await fetch(url+'/rest/v1/rpc/chair_work',{method:'POST',headers:headers(access),body:JSON.stringify(body),signal:AbortSignal.timeout(25000)});
+    const data=await response.json();
+    if(!response.ok){const e=Error(data.message==='VERSION_CONFLICT'?'其他人已更新資料；目前輸入已保留，請先匯出草稿，再重新載入核對。':data.message==='CHAIR_ACCOUNT_REQUIRED'?'登入已失效或無主席系統權限。':'雲端儲存未完成（'+(data.message||response.status)+'），輸入已保留。');e.status=response.status;e.code=data.message;throw e;}
+    return data;
+  }
   async function api(path){
     const access=await token();
     try{return await request('/functions/v1/chair-api/'+path,{headers:headers(access),cache:'no-store'});}
@@ -51,5 +58,5 @@
   }
   function select(value){if(!session?.identities?.includes(value))throw Error('請選擇有效職務。');session.identity=value;persist();}
   function logout(){const old=session?.accessToken;clear();if(old)request('/auth/v1/logout?scope=local',{method:'POST',headers:headers(old)}).catch(()=>{});location.replace('index.html');}
-  window.ChairAuth=Object.freeze({enabled:true,login,restore,identity,select,logout,api});
+  window.ChairAuth=Object.freeze({enabled:true,login,restore,identity,select,logout,api,rpc});
 })();

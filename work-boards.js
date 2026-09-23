@@ -89,14 +89,14 @@
       }});}catch(error){$("boardEditorError").textContent=error.message;}
     };
     $("boardEditorForm").oninput=()=>{if(editor)editor.dirty=true;};
-    $("boardEditorForm").onsubmit=e=>{
+    $("boardEditorForm").onsubmit=async e=>{
       e.preventDefault();if(!editor)return;const draft={...editor},v=Object.fromEntries(new FormData(e.currentTarget));
       try{
         if(draft.kind==="board"&&(!v.title.trim()||!Object.hasOwn(covers,v.cover)))throw Error("請輸入看板名稱並選擇封面。");
         if(draft.kind==="member"&&!v.name.trim())throw Error("請輸入成員姓名。");
         if(draft.kind==="list"&&(!v.title.trim()||!["",...states].includes(v.status)))throw Error("請輸入清單名稱及有效狀態。");
         let nextId=draft.id;
-        commit(d=>{
+        await commit(d=>{
           const now=new Date().toISOString();
           if(draft.kind==="board"){
             const old=d.boards.find(b=>b.id===draft.id&&b.unitId===draft.unitId);
@@ -123,10 +123,10 @@
     function focusComposer(){host.querySelector("#quickCompose textarea")?.focus();}
     host.addEventListener("input",e=>{if(e.target.closest("#quickCompose")&&composer)composer.text=e.target.value;});
     host.addEventListener("keydown",e=>{if(e.target.closest("#quickCompose")&&composer){if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();e.target.closest("form").requestSubmit();}if(e.key==="Escape"){composer=null;render();}}});
-    host.addEventListener("submit",e=>{
+    host.addEventListener("submit",async e=>{
       if(e.target.id!=="quickCompose")return;e.preventDefault();if(!composer)return;
       const title=composer.text.trim(), draft={...composer}, boardId=current.boardId;if(!title)return;
-      try{commit(d=>{
+      try{await commit(d=>{
         const b=d.boards.find(b=>b.id===boardId);if(!b)throw Error("看板已變動。");const now=new Date().toISOString();
         if(draft.kind==="list"){b.lists=M.lists(b);b.lists.push({id:crypto.randomUUID(),title,status:""});b.updatedAt=now;}
         else{const l=M.lists(b).find(l=>l.id===draft.listId);if(!l)throw Error("清單已變動。");const status=l.status||states[0], owner=current.unit.name;d.tasks.push({id:crypto.randomUUID(),title,owner,status,date:"",notes:"",boardId:b.id,boardListId:l.id,boardOrder:M.cards(d,b,l.id).reduce((max,t)=>Math.max(max,t.boardOrder??0),-1)+1,createdAt:now,updatedAt:now,history:[{at:now,by:identity.identity,title,status,date:"",notes:"",boardId:b.id,boardListId:l.id}]});}
@@ -156,10 +156,10 @@
       if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;
       host.querySelectorAll("[data-drag-task]").forEach(el=>{const old=before.get(el.dataset.dragTask);if(!old)return;const rect=el.getBoundingClientRect(),x=old.x-rect.x,y=old.y-rect.y;if(x||y)el.animate([{transform:`translate(${x}px,${y}px)`},{transform:"translate(0,0)"}],{duration:180,easing:"cubic-bezier(.2,.8,.2,1)"});});
     }
-    function moveTask(id,listId,beforeId=""){
+    async function moveTask(id,listId,beforeId=""){
       if(!current)return;
       const positions=new Map([...host.querySelectorAll("[data-drag-task]")].map(el=>[el.dataset.dragTask,el.getBoundingClientRect()]));
-      try{commit(d=>M.move(d,current.boardId,id,listId,beforeId,identity.identity));animatePositions(positions);toast("卡片位置已儲存");}catch(err){toast(err.message);render();}
+      try{await commit(d=>M.move(d,current.boardId,id,listId,beforeId,identity.identity));animatePositions(positions);toast("卡片位置已儲存");}catch(err){toast(err.message);render();}
     }
     host.addEventListener("change",e=>{if(e.target.matches("[data-move-task]"))moveTask(e.target.dataset.moveTask,e.target.value);});
     let dragged=null, drop=null;
@@ -177,10 +177,10 @@
       if(before)before.classList.add("drop-before");else if(candidates.length)candidates.at(-1).classList.add("drop-after");else col.classList.add("drop-column");
       drop={listId:col.dataset.listId,beforeId:before?.dataset.dragTask||""};
     });
-    host.addEventListener("drop",e=>{
+    host.addEventListener("drop",async e=>{
       if(!dragged||!drop||!e.target.closest("[data-list-id]"))return;e.preventDefault();clearDrop();
       if(dragged.kind==="card")moveTask(dragged.id,drop.listId,drop.beforeId);
-      else if(dragged.id!==drop.listId)try{const id=dragged.id,target=drop.listId;commit(d=>{const b=d.boards.find(b=>b.id===current.boardId);if(!b)throw Error("看板已變動。");b.lists=M.lists(b);const from=b.lists.findIndex(l=>l.id===id),to=b.lists.findIndex(l=>l.id===target);if(from<0||to<0)throw Error("清單已變動。");const [l]=b.lists.splice(from,1);b.lists.splice(to,0,l);b.updatedAt=new Date().toISOString();});}catch(err){toast(err.message);}
+      else if(dragged.id!==drop.listId)try{const id=dragged.id,target=drop.listId;await commit(d=>{const b=d.boards.find(b=>b.id===current.boardId);if(!b)throw Error("看板已變動。");b.lists=M.lists(b);const from=b.lists.findIndex(l=>l.id===id),to=b.lists.findIndex(l=>l.id===target);if(from<0||to<0)throw Error("清單已變動。");const [l]=b.lists.splice(from,1);b.lists.splice(to,0,l);b.updatedAt=new Date().toISOString();});}catch(err){toast(err.message);}
       dragged=null;drop=null;
     });
     host.addEventListener("dragend",()=>{dragged=null;drop=null;clearDrop();host.querySelectorAll(".dragging").forEach(c=>c.classList.remove("dragging"));});

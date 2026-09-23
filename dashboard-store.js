@@ -24,8 +24,7 @@
   const validateKpi=data=>{if(data.termGoals!==undefined){if(!window.ChairTermKpi)throw Error("KPI 模組尚未載入，已停止寫入。");window.ChairTermKpi.validateAll(data);}};
   const validatePower=data=>{for(const m of data.meetings){if(m.powerOfOne!==undefined){if(!window.ChairPowerOfOne)throw Error("Power of One 模組尚未載入，已停止寫入。");window.ChairPowerOfOne.validate(m.powerOfOne);}}};
   const validateMeetings=data=>{if(data.meetings.some(m=>m.agenda!==undefined||m.termKpi!==undefined||m.history?.some(h=>h.termKpi!==undefined))||data.tasks.some(t=>t.sourceEntryId)){if(!window.ChairMeetingModel)throw Error("會議模組尚未載入，已停止寫入。");window.ChairMeetingModel.validate(data);}};
-  const read=()=>{
-    const raw=localStorage.getItem(KEY);if(raw===null)return empty();
+  const parse=raw=>{if(raw===null)return empty();
     let data;try{data=JSON.parse(raw);}catch{throw Error("本機資料無法讀取，已停止寫入並保留原內容。");}
     if(data?.version!==1||!Number.isSafeInteger(data.revision)||data.revision<0||!["tasks","meetings","messages","links","read"].every(k=>Array.isArray(data[k])))throw Error("本機資料格式不符，已保留原內容，請先匯出備份。");
     for(const key of ["tasks","meetings","messages","links"]){const ids=new Set();for(const item of data[key]){if(!item||typeof item.id!=="string"||ids.has(item.id))throw Error("本機資料不完整，已停止寫入。");ids.add(item.id);}}
@@ -34,8 +33,10 @@
     if(!Object.hasOwn(data,"workUnits"))data.workUnits=[];
     validateBoards(data);validateConsensus(data);validateMeetings(data);validatePower(data);validateKpi(data);if(data.tasks.some(t=>t.card!==undefined)){if(!window.ChairCardModel)throw Error("卡片資料模組尚未載入，已停止寫入。");window.ChairCardModel.validateAll(data);}return data;
   };
-  window.ChairData = Object.freeze({KEY,empty,read,
-    save(change,revision){const old=read();if(old.revision!==revision)throw Error("另一個分頁已更新資料。請先重新整理並核對；目前輸入已保留。");const next=structuredClone(old);change(next);validateBoards(next);validateConsensus(next);validateMeetings(next);validatePower(next);validateKpi(next);if(next.tasks.some(t=>t.card!==undefined)){if(!window.ChairCardModel)throw Error("卡片資料模組尚未載入，已停止寫入。");window.ChairCardModel.validateAll(next);}next.revision=old.revision+1;localStorage.setItem(KEY,JSON.stringify(next));return next;},
-    raw(){return localStorage.getItem(KEY)||JSON.stringify(empty());}
+  const read=()=>window.ChairCloud?.ready?window.ChairCloud.read():parse(localStorage.getItem(KEY));
+  const validate=data=>parse(JSON.stringify(data));
+  window.ChairData = Object.freeze({KEY,empty,read,parse,validate,
+    save(change,revision){const old=read();if(old.revision!==revision)throw Error("另一個分頁已更新資料。請先重新整理並核對；目前輸入已保留。");const next=structuredClone(old);change(next);validateBoards(next);validateConsensus(next);validateMeetings(next);validatePower(next);validateKpi(next);if(next.tasks.some(t=>t.card!==undefined)){if(!window.ChairCardModel)throw Error("卡片資料模組尚未載入，已停止寫入。");window.ChairCardModel.validateAll(next);}next.revision=old.revision+1;if(window.ChairCloud?.ready)return window.ChairCloud.save(old,next);localStorage.setItem(KEY,JSON.stringify(next));return next;},
+    raw(){return window.ChairCloud?.ready?JSON.stringify(read()):localStorage.getItem(KEY)||JSON.stringify(empty());}
   });
 })();

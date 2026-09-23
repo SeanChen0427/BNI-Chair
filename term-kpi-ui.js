@@ -13,7 +13,7 @@
       dialog.querySelectorAll('[data-kpi-close]').forEach(b=>b.onclick=leave);
       dialog.querySelector('form').oninput=e=>{if(e.target.name)state.dirty=true;};
       const select=dialog.querySelector('#termKpiVersion');if(select)select.onchange=()=>dialog.querySelector('#termKpiSnapshot').innerHTML=metrics(t.history[Number(select.value)].values,'kpi-history-grid');
-      dialog.querySelector('form').onsubmit=e=>{e.preventDefault();try{const values=M.parse(Object.fromEntries(new FormData(e.target)));if(!dirty()){leave();return;}commit(d=>M.apply(d,values,identity.identity),state.revision);state.dirty=false;leave();toast('本屆 KPI 目標已儲存');}catch(err){dialog.querySelector('#termKpiError').textContent=err.message;}};
+      dialog.querySelector('form').onsubmit=async e=>{e.preventDefault();try{const values=M.parse(Object.fromEntries(new FormData(e.target)));if(!dirty()){leave();return;}await commit(d=>M.apply(d,values,identity.identity),state.revision);state.dirty=false;leave();toast('本屆 KPI 目標已儲存');}catch(err){dialog.querySelector('#termKpiError').textContent=err.message;}};
       dialog.showModal();if(history)dialog.querySelector('.kpi-history').scrollIntoView({block:'nearest'});
     }
     dialog.addEventListener('cancel',e=>{e.preventDefault();leave();});dialog.addEventListener('close',()=>{state=null;panel.querySelector('[data-kpi-edit]')?.focus({preventScroll:true});});
