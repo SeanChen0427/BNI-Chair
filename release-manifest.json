@@ -3,7 +3,7 @@
   "mode": "authenticated-shared-chair-work",
   "assets": {
     "index.html": "45994485dc4de79dfab8fab960eca57f3c29130e8886d8443212a4cfff890950",
-    "dashboard.html": "eb96cd8376ae84281e2643595f00fac655d96401f10f011dd84962ca8721f0d4",
+    "dashboard.html": "ead5fc308acda0f228735677fd66cafbbfa06f2364bacd03de19cb6ef39d8d74",
     "login.css": "b92ced8f804894a91368a36d93ff8fb6613b7da8514802997250d19bfe6d8abc",
     "preview-session.js": "c86554d1925e6644d3d72dcb5055e1f67dde54f89ee74fd39be7422a3ee1720d",
     "release-preview.css": "39c7cad80e099801922647669c0511b5a94e2c9c5087ff90646e2d17e3422cb7",
@@ -13,7 +13,7 @@
     "work-boards.css": "79ee6f6ba7a9daa717557bd159aca3f6bf6b0ce0dcdfc18905502b635587cf32",
     "card-details.css": "7a8b37bf23b40f94012aa04992f17d223340a83e6ac93369a144eba8ec4bc952",
     "meeting-workspace.css": "5da24da6419677d85c6ad6e67cac2bc6f00198693dcd25d4948267670db17d21",
-    "dashboard.js": "e4133827b4d3d9d0f99ba6f15a407a24e99240e7c64b98ab3a9aa2ab2491c3be",
+    "dashboard.js": "403a7678e62fc209a5928e12f298bd4c5478e675f5a809321f18aaff24f18218",
     "card-model.js": "4b19786f4772478bc1d8b8ed9eaccf4b63a9a646a0c9812274aa0b67aa1d7eb3",
     "power-of-one.js": "94ed222419ba3e67e7d0130ed1aca8b1931343c1aa187ddfabe763cbc46e0df2",
     "meeting-model.js": "e3b89f769939685a71f1e280d6806de8cac25a82c19841e5987ae4bb197dbad8",
@@ -35,6 +35,6 @@
     "production-login.js": "5a94853dff095263858885c634b236e350d73cbe27ca3eecd35ff2fe8e45f07c",
     "member-data.js": "432ea3ed748d6fec6ae1702b17ef18a36d78b09c6ebbe10f031710baf18fce51",
     "member-data.css": "7266a0e99a34f3195e39783365778f7a7ff8f3c99a40f135b37eec5e16e554e9",
-    "cloud-store.js": "530fea7960319e091fbf54008c508a4fc80d0d583ef76399dc393c82ef84fecb"
+    "cloud-store.js": "029cb6b54967250914b19627060d275220e2a0ff9dd145982916a4e2c3a0875d"
   }
 }

@@ -199,7 +199,7 @@
   function dirty(){return !!($("messageInput").value.trim()||editorState?.dirty||boards.dirty()||cardDetails.dirty()||meetingWorkspace.dirty()||termKpi.dirty());}
   $("cloudSaving")?.addEventListener('cancel',e=>e.preventDefault());
   function download(name,text){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-  $("exportPending").onclick=()=>download('富聯-待送草稿.json',localStorage.getItem(ChairCloud.PENDING)||JSON.stringify({note:'沒有待送儲存'}));
+  $("exportPending").onclick=()=>download('富聯-待送草稿.json',JSON.stringify({pending:JSON.parse(localStorage.getItem(ChairCloud.PENDING)||'null'),conflicts:Object.keys(localStorage).filter(k=>k.startsWith(ChairCloud.PENDING+'-conflict-')).map(k=>({key:k,request:JSON.parse(localStorage.getItem(k))}))}));
   $("refreshCloud").onclick=async()=>{if(dirty()){toast('請先匯出待送草稿並保存或取消正在編輯的內容，再重新讀取。');return;}try{data=ChairCloud.ready?await ChairCloud.refresh():await ChairCloud.init();blocked=false;$("storageAlert").hidden=true;render();if(route==='meeting')meetingWorkspace.refresh();toast('已重新讀取雲端');}catch(e){toast(e.message);}};
   $("cloudHistory").onclick=async()=>{try{
     const list=await ChairCloud.history(),dialog=$("cloudVersions");

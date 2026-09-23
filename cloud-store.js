@@ -4,6 +4,8 @@
  const CACHE='fulian-chair-cloud-cache-v1',PENDING='fulian-chair-cloud-pending-v1',LEGACY='fulian-chair-rebuild-dashboard-v1';
  const collections=['meetings','tasks','boards','workUnits','messages','links'];
  const settings=['termGoals','preMeetingSchedule'];
+ const readKey=()=> 'fulian-chair-cloud-read-v1:'+encodeURIComponent(ChairAuth.identity()?.identity||'');
+ function readPreference(){try{const v=JSON.parse(localStorage.getItem(readKey())||'[]');return Array.isArray(v)?v.filter(x=>typeof x==='string'):[];}catch{return [];}}
  let current=null,busy=false,ready=false,dbPromise;
  const stable=v=>JSON.stringify(canonical(v));
  function canonical(v){return Array.isArray(v)?v.map(canonical):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])])):v;}
@@ -14,7 +16,7 @@
  function database(){if(!dbPromise)dbPromise=new Promise((resolve,reject)=>{const q=indexedDB.open('fulian-chair-versions-v1',1);q.onupgradeneeded=()=>q.result.createObjectStore('versions',{keyPath:'revision'});q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error);});return dbPromise;}
  async function mirror(receipt){const db=await database();await new Promise((resolve,reject)=>{const tx=db.transaction('versions','readwrite');tx.objectStore('versions').put(receipt);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});}
  function status(text,error=false){const el=document.getElementById('cloudStatus');if(el){el.textContent=text;el.classList.toggle('error',error);}}
- async function accept(receipt){const state=await decode(receipt);current=state;let warning=false;try{await mirror(receipt);localStorage.setItem(CACHE,JSON.stringify(receipt));}catch{warning=true;}status(warning?'已存雲端；此裝置副本保存失敗，請匯出備份。':'已連線 · 雲端版本 '+state.revision,warning);return structuredClone(state);}
+ async function accept(receipt){const state=await decode(receipt);current={...state,read:readPreference()};let warning=false;try{await mirror(receipt);localStorage.setItem(CACHE,JSON.stringify(receipt));}catch{warning=true;}status(warning?'已存雲端；此裝置副本保存失敗，請匯出備份。':'已連線 · 雲端版本 '+state.revision,warning);return read();}
  async function send(body){try{return await ChairAuth.rpc(body);}catch(e){if(e.status)throw e;return ChairAuth.rpc(body);}}
  async function init(){
   const legacy=ChairData.parse(localStorage.getItem(LEGACY));
@@ -42,7 +44,7 @@
   if(busy)throw Error('正在儲存，請稍候。');
   if(localStorage.getItem(PENDING))throw Error('上次儲存尚待核對。請匯出待送內容後，按「重新讀取雲端」確認。');
   if(old.revision!==current.revision)throw Error('資料已更新，請先核對目前輸入。');
-  const changes=diff(old,next);if(!changes.length){current.read=next.read||current.read;return read();}
+  const changes=diff(old,next);if(!changes.length){current.read=next.read||current.read;localStorage.setItem(readKey(),JSON.stringify(current.read));return read();}
   const body={p_action:'save',p_expected:old.revision,p_changes:changes,p_request:crypto.randomUUID(),p_identity:ChairAuth.identity().identity};
   localStorage.setItem(PENDING,JSON.stringify(body));busy=true;status('正在儲存至雲端…');
   try{const receipt=await send(body);const result=await accept(receipt);localStorage.removeItem(PENDING);return result;}
