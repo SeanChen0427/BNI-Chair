@@ -29,3 +29,5 @@
 .mw-actions [data-mw="export-word"]{border:1px solid #dce1e7;border-radius:8px;padding:10px 16px;background:#fff;color:#536171;font-size:13px;cursor:pointer}.mw-actions [data-mw="export-word"]:hover{background:#f7f8fa}
 
 .power-month-list{display:grid;gap:18px}.power-month-list>.power-editor{border:1px solid #e2e6eb;border-radius:10px;padding:16px;background:#fff}.power-month-head{display:flex;align-items:end;justify-content:space-between;gap:12px}.power-month-head>label{flex:1}.power-month-head>button{font-size:12px;color:#805066;background:transparent;border:0;padding:10px}.power-month-list>button{justify-self:start;border:1px solid #dce1e7;border-radius:7px;padding:9px 14px;background:#fff}
+
+.mw-role-group{margin:16px 0 22px;min-width:0}.mw-role-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.mw-role-head .mw-role-title{margin:0}.mw-role-head .mw-add-record{margin:0;border:1px solid #e2d5da;border-radius:6px;padding:7px 10px;color:#89344d;background:#fff;cursor:pointer}.mw-role-head .mw-add-record:hover{background:#fcf1f5}
